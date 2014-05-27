@@ -7,6 +7,9 @@ import Control.Lens
 import Text.Pandoc.Definition
 import Data.Map (Map)
 
+body :: Lens' Pandoc [Block]
+body = lens (\(Pandoc _ b)->b) (\(Pandoc m _) b->Pandoc m b)
+
 _Plain :: Prism' Block [Inline]
 _Plain = prism' Plain f
   where
