@@ -1,0 +1,4 @@
+# pandoc-lens - Lenses for Pandoc documents
+
+This package provides a variety of lenses for working with Pandoc
+documents.
