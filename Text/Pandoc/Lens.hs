@@ -1,4 +1,5 @@
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Text.Pandoc.Lens
     ( -- * Documents
@@ -86,17 +87,22 @@ _Null = prism' (const Null) f
 --makePrisms ''Inline
 --makePrisms ''MetaValue
 
+instance Wrapped Meta where
+    type Unwrapped Meta = Map String MetaValue
+    _Wrapped' = iso unMeta Meta
+
+-- | A prism focusing on a particular metadata value
 --meta :: String -> Prism' Pandoc MetaValue
-meta m = metaL . unwrap . ix m
+meta m = metaL . _Wrapped' . ix m
   where
-    unwrap :: Iso' Meta (Map String MetaValue)
-    unwrap = iso unMeta Meta
     metaL :: Lens' Pandoc Meta
     metaL = lens (\(Pandoc m _)->m) (\(Pandoc _ a) m->Pandoc m a)
-  
+
+-- | An object that has attributes
 class HasAttr a where
+  -- | A traversal over the attributes of an object
   attributes :: Traversal' a Attr
-  
+
 instance HasAttr Block where
   attributes f (CodeBlock a s) = fmap (\a'->CodeBlock a' s) (f a)
   attributes f (Header n a s)  = fmap (\a'->Header n a' s) (f a)
