@@ -24,7 +24,7 @@ module Text.Pandoc.Lens
     , _SmallCaps
     -- , _Quoted
     -- , _Cite
-    -- , _Code
+    , _Code
     , _Space
     , _LineBreak
     -- , _Math
@@ -152,6 +152,13 @@ _SmallCaps = prism' SmallCaps f
   where
     f (SmallCaps s) = Just s
     f _             = Nothing
+
+-- | A prism on the body of a 'Code' 'Inline'
+_Code :: Prism' Inline String
+_Code = prism' (Code nullAttr) f
+  where
+    f (Code _ s) = Just s
+    f _          = Nothing
 
 -- | A prism on a 'Space' 'Inline'
 _Space :: Prism' Inline ()
