@@ -6,6 +6,7 @@ module Text.Pandoc.Lens
     ( -- * Documents
       body
       -- * Blocks
+    , Block
     , _Plain
     , _Para
     , _CodeBlock
@@ -15,6 +16,7 @@ module Text.Pandoc.Lens
     , _HorizontalRule
     , _Null
       -- * Inlines
+    , Inline
     , _Str
     , _Emph
     , _Strong
