@@ -48,42 +48,42 @@ import Data.Map (Map)
 body :: Lens' Pandoc [Block]
 body = lens (\(Pandoc _ b)->b) (\(Pandoc m _) b->Pandoc m b)
 
--- | A prism on a plain block
+-- | A prism on a 'Plain' 'Block'
 _Plain :: Prism' Block [Inline]
 _Plain = prism' Plain f
   where
     f (Plain x) = Just x
     f _         = Nothing
 
--- | A prism on a paragraph block
+-- | A prism on a paragraph 'Block'
 _Para :: Prism' Block [Inline]
 _Para = prism' Para f
   where
     f (Para x)  = Just x
     f _         = Nothing
 
--- | A prism on the text of a code block
+-- | A prism on the text of a 'CodeBlock'
 _CodeBlock :: Prism' Block String
 _CodeBlock = prism' (CodeBlock nullAttr) f
   where
     f (CodeBlock _ x)    = Just x
     f _                  = Nothing
 
--- | A prism on a block quote
+-- | A prism on a 'BlockQuote'
 _BlockQuote :: Prism' Block [Block]
 _BlockQuote = prism' BlockQuote f
   where
     f (BlockQuote x)     = Just x
     f _                  = Nothing
 
--- | A prism on the items of a bullet list block
+-- | A prism on the items of a bullet list 'Block'
 _BulletList :: Prism' Block [[Block]]
 _BulletList = prism' BulletList f
   where
     f (BulletList x)     = Just x
     f _                  = Nothing
 
--- | A prism on the items of a definition list
+-- | A prism on the items of a definition list 'Block'
 _DefinitionList :: Prism' Block [([Inline], [[Block]])]
 _DefinitionList = prism' DefinitionList f
   where
