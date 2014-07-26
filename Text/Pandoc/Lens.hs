@@ -188,11 +188,8 @@ _Span = prism' (Span nullAttr) f
     f (Span _ s) = Just s
     f _          = Nothing
 
--- | A traversal over the children of an Inline
-inlines :: Traversal' Inline Inline
-inlines = undefined
-
---makePrisms ''MetaValue
+instance Plated Inline
+instance Plated Block
 
 instance Wrapped Meta where
     type Unwrapped Meta = Map String MetaValue
