@@ -5,7 +5,10 @@
 module Text.Pandoc.Lens
     ( -- * Documents
       body
+    , meta
       -- * Blocks
+      -- | Prisms are provided for the constructors of 'Block'
+      -- as well as a 'Plated' instance.
     , Block
     , _Plain
     , _Para
@@ -16,6 +19,8 @@ module Text.Pandoc.Lens
     , _HorizontalRule
     , _Null
       -- * Inlines
+      -- | Prisms are provided for the constructors of 'Inline'
+      -- as well as a 'Plated' instance.
     , Inline
     , _Str
     , _Emph
@@ -35,8 +40,6 @@ module Text.Pandoc.Lens
     -- , _Image
     , _Note
     , _Span
-      -- * Metadata values
-    , meta
       -- * Attributes
     , HasAttr(..)
     ) where
@@ -49,6 +52,17 @@ import Data.Map (Map)
 -- | The body of a pandoc document
 body :: Lens' Pandoc [Block]
 body = lens (\(Pandoc _ b)->b) (\(Pandoc m _) b->Pandoc m b)
+
+-- | A traversal focusing on a particular metadata value of a document
+meta :: String -> Traversal' Pandoc MetaValue
+meta m = metaL . _Wrapped' . ix m
+  where
+    metaL :: Lens' Pandoc Meta
+    metaL = lens (\(Pandoc m _)->m) (\(Pandoc _ a) m->Pandoc m a)
+
+instance Wrapped Meta where
+    type Unwrapped Meta = Map String MetaValue
+    _Wrapped' = iso unMeta Meta
 
 -- | A prism on a 'Plain' 'Block'
 _Plain :: Prism' Block [Inline]
@@ -192,17 +206,6 @@ _Span = prism' (Span nullAttr) f
 
 instance Plated Inline
 instance Plated Block
-
-instance Wrapped Meta where
-    type Unwrapped Meta = Map String MetaValue
-    _Wrapped' = iso unMeta Meta
-
--- | A traversal focusing on a particular metadata value
-meta :: String -> Traversal' Pandoc MetaValue
-meta m = metaL . _Wrapped' . ix m
-  where
-    metaL :: Lens' Pandoc Meta
-    metaL = lens (\(Pandoc m _)->m) (\(Pandoc _ a) m->Pandoc m a)
 
 -- | An object that has attributes
 class HasAttr a where
