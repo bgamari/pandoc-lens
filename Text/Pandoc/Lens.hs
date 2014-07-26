@@ -1,5 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Text.Pandoc.Lens
     ( -- * Documents
@@ -13,7 +14,26 @@ module Text.Pandoc.Lens
     , _DefinitionList
     , _HorizontalRule
     , _Null
-      -- * Meta values
+      -- * Inlines
+    , _Str
+    , _Emph
+    , _Strong
+    , _Strikeout
+    , _Superscript
+    , _Subscript
+    , _SmallCaps
+    -- , _Quoted
+    -- , _Cite
+    -- , _Code
+    , _Space
+    , _LineBreak
+    -- , _Math
+    -- , _RawInline
+    --  , _Link
+    --  , _Image
+    , _Note
+    --  , _Span
+      -- * Metadata values
     , meta
       -- * Attributes
     , HasAttr(attributes)
@@ -70,21 +90,94 @@ _DefinitionList = prism' DefinitionList f
     f (DefinitionList x) = Just x
     f _                  = Nothing
 
--- | A prism on a horizontal rule
+-- | A prism on a 'HorizontalRule' 'Block'
 _HorizontalRule :: Prism' Block ()
 _HorizontalRule = prism' (const HorizontalRule) f
   where
     f HorizontalRule     = Just ()
     f _                  = Nothing
 
--- | A prism on a null block
+-- | A prism on a 'Null' 'Block'
 _Null :: Prism' Block ()
 _Null = prism' (const Null) f
   where
     f Null = Just ()
     f _    = Nothing
 
---makePrisms ''Inline
+-- | A prism on a 'Str' 'Inline'
+_Str :: Prism' Inline String
+_Str = prism' Str f
+  where
+    f (Str s) = Just s
+    f _       = Nothing
+
+-- | A prism on an 'Emph' 'Inline'
+_Emph :: Prism' Inline [Inline]
+_Emph = prism' Emph f
+  where
+    f (Emph s) = Just s
+    f _        = Nothing
+
+-- | A prism on a 'Strong' 'Inline'
+_Strong :: Prism' Inline [Inline]
+_Strong = prism' Strong f
+  where
+    f (Strong s) = Just s
+    f _          = Nothing
+
+-- | A prism on a 'Strikeout' 'Inline'
+_Strikeout :: Prism' Inline [Inline]
+_Strikeout = prism' Strikeout f
+  where
+    f (Strikeout s) = Just s
+    f _             = Nothing
+
+-- | A prism on a 'Superscript' 'Inline'
+_Superscript :: Prism' Inline [Inline]
+_Superscript = prism' Superscript f
+  where
+    f (Superscript s) = Just s
+    f _               = Nothing
+
+-- | A prism on a 'Subscript' 'Inline'
+_Subscript :: Prism' Inline [Inline]
+_Subscript = prism' Subscript f
+  where
+    f (Subscript s) = Just s
+    f _             = Nothing
+
+-- | A prism on a 'SmallCaps' 'Inline'
+_SmallCaps :: Prism' Inline [Inline]
+_SmallCaps = prism' SmallCaps f
+  where
+    f (SmallCaps s) = Just s
+    f _             = Nothing
+
+-- | A prism on a 'Space' 'Inline'
+_Space :: Prism' Inline ()
+_Space = prism' (const Space) f
+  where
+    f Space = Just ()
+    f _     = Nothing
+
+-- | A prism on a 'LineBreak' 'Inline'
+_LineBreak :: Prism' Inline ()
+_LineBreak = prism' (const LineBreak) f
+  where
+    f LineBreak = Just ()
+    f _         = Nothing
+
+-- | A prism on a 'Note' 'Inline'
+_Note :: Prism' Inline [Block]
+_Note = prism' Note f
+  where
+    f (Note s) = Just s
+    f _        = Nothing
+
+-- | A traversal over the children of an Inline
+inlines :: Traversal' Inline Inline
+inlines = undefined
+
 --makePrisms ''MetaValue
 
 instance Wrapped Meta where
