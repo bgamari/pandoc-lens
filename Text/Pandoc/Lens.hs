@@ -91,8 +91,8 @@ instance Wrapped Meta where
     type Unwrapped Meta = Map String MetaValue
     _Wrapped' = iso unMeta Meta
 
--- | A prism focusing on a particular metadata value
---meta :: String -> Prism' Pandoc MetaValue
+-- | A traversal focusing on a particular metadata value
+meta :: String -> Traversal' Pandoc MetaValue
 meta m = metaL . _Wrapped' . ix m
   where
     metaL :: Lens' Pandoc Meta
