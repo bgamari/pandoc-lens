@@ -29,14 +29,14 @@ module Text.Pandoc.Lens
     , _LineBreak
     -- , _Math
     -- , _RawInline
-    --  , _Link
-    --  , _Image
+    -- , _Link
+    -- , _Image
     , _Note
-    --  , _Span
+    , _Span
       -- * Metadata values
     , meta
       -- * Attributes
-    , HasAttr(attributes)
+    , HasAttr(..)
     ) where
 
 import Control.Applicative
@@ -181,6 +181,13 @@ _Note = prism' Note f
     f (Note s) = Just s
     f _        = Nothing
 
+-- | A prism on a 'Span' 'Inline'
+_Span :: Prism' Inline [Inline]
+_Span = prism' (Span nullAttr) f
+  where
+    f (Span _ s) = Just s
+    f _          = Nothing
+
 -- | A traversal over the children of an Inline
 inlines :: Traversal' Inline Inline
 inlines = undefined
@@ -207,4 +214,9 @@ instance HasAttr Block where
   attributes f (CodeBlock a s) = fmap (\a'->CodeBlock a' s) (f a)
   attributes f (Header n a s)  = fmap (\a'->Header n a' s) (f a)
   attributes f (Div a s)       = fmap (\a'->Div a' s) (f a)
+  attributes _ x = pure x
+
+instance HasAttr Inline where
+  attributes f (Code a s) = fmap (\a'->Code a' s) (f a)
+  attributes f (Span a s) = fmap (\a'->Span a' s) (f a)
   attributes _ x = pure x
