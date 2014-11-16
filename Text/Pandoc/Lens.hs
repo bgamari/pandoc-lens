@@ -17,6 +17,7 @@ module Text.Pandoc.Lens
       -- | Prisms are provided for the constructors of 'Block'
       -- as well as a 'Plated' instance.
     , Block
+    , blockInlines
     , _Plain
     , _Para
     , _CodeBlock
@@ -25,7 +26,6 @@ module Text.Pandoc.Lens
     , _DefinitionList
     , _HorizontalRule
     , _Null
-    , blockInlines
       -- * Inlines
       -- | Prisms are provided for the constructors of 'Inline'
       -- as well as a 'Plated' instance.
