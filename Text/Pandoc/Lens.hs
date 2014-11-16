@@ -2,6 +2,12 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TemplateHaskell #-}
 
+-- | This provides a variety of optics for traversing and
+-- destructuring pandoc documents.
+--
+-- Note that both @Inline@ and @Block@ have @Plated@ instances which are useful
+-- for traversing the AST.
+
 module Text.Pandoc.Lens
     ( -- * Documents
       body
@@ -232,8 +238,8 @@ _Span = prism' (Span nullAttr) f
 instance Plated Inline where
     plate f inl =
       case inl of
-        Emph cs        -> Emph <$> traverseOf each f cs 
-        Strong cs      -> Strong <$> traverseOf each f cs 
+        Emph cs        -> Emph <$> traverseOf each f cs
+        Strong cs      -> Strong <$> traverseOf each f cs
         Strikeout cs   -> Strikeout <$> traverseOf each f cs
         Superscript cs -> Superscript <$> traverseOf each f cs
         Subscript cs   -> Subscript <$> traverseOf each f cs
