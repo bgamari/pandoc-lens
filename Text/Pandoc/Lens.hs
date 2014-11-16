@@ -219,7 +219,19 @@ _Span = prism' (Span nullAttr) f
     f (Span _ s) = Just s
     f _          = Nothing
 
-instance Plated Inline
+instance Plated Inline where
+    plate f inl =
+      case inl of
+        Emph cs        -> Emph <$> traverseOf each f cs 
+        Strong cs      -> Strong <$> traverseOf each f cs 
+        Strikeout cs   -> Strikeout <$> traverseOf each f cs
+        Superscript cs -> Superscript <$> traverseOf each f cs
+        Subscript cs   -> Subscript <$> traverseOf each f cs
+        SmallCaps cs   -> SmallCaps <$> traverseOf each f cs
+        Quoted q cs    -> Quoted q <$> traverseOf each f cs
+        Cite cit cs    -> Cite cit <$> traverseOf each f cs
+        Span attrs cs  -> Span attrs <$> traverseOf each f cs
+        _              -> pure inl
 
 -- | An object that has attributes
 class HasAttr a where
