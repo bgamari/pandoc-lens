@@ -18,6 +18,7 @@ module Text.Pandoc.Lens
     , _DefinitionList
     , _HorizontalRule
     , _Null
+    , blockInlines
       -- * Inlines
       -- | Prisms are provided for the constructors of 'Inline'
       -- as well as a 'Plated' instance.
@@ -132,8 +133,17 @@ instance Plated Block where
         Div attrs blk          -> Div attrs <$> traverseOf each f blk
         _                      -> pure blk
 
+-- | Traverse over the 'Inline' children of a 'Block'
 blockInlines :: Traversal' Block Inline
-blockInlines = undefined
+blockInlines f blk =
+    case blk of
+      Plain inls         -> Plain <$> traverse f inls
+      Para inls          -> Para <$> traverse f inls
+      DefinitionList xs  -> DefinitionList <$> traverseOf (each . _1 . each) f xs
+      Header n attr inls -> Header n attr <$> traverse f inls
+      Table capt a b c d -> Table <$> traverse f capt
+                                  <*> pure a <*> pure b <*> pure c <*> pure d
+      _                  -> pure blk
 
 -- | A prism on a 'Str' 'Inline'
 _Str :: Prism' Inline String
