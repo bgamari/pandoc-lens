@@ -3,10 +3,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | This provides a variety of optics for traversing and
--- destructuring pandoc documents.
+-- destructuring Pandoc documents.
 --
--- Note that both @Inline@ and @Block@ have @Plated@ instances which are useful
--- for traversing the AST.
+-- Note that both @Inline@ and @Block@ have @Plated@ instances which
+-- are useful for traversing the AST.
 
 module Text.Pandoc.Lens
     ( -- * Documents
