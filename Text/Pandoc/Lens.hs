@@ -120,6 +120,21 @@ _Null = prism' (const Null) f
     f Null = Just ()
     f _    = Nothing
 
+instance Plated Block where
+    plate f blk =
+      case blk of
+        BlockQuote blks        -> BlockQuote <$> traverse f blks
+        OrderedList attrs blks -> OrderedList attrs <$> traverseOf (each . each) f blks
+        BulletList blks        -> BulletList <$> traverseOf (each . each) f blks
+        DefinitionList blks    -> DefinitionList <$> traverseOf (each . _2 . each . each) f blks
+        Table a b c hdrs rows  -> Table a b c <$> traverseOf (each . each) f hdrs
+                                              <*> traverseOf (each . each . each) f rows
+        Div attrs blk          -> Div attrs <$> traverseOf each f blk
+        _                      -> pure blk
+
+blockInlines :: Traversal' Block Inline
+blockInlines = undefined
+
 -- | A prism on a 'Str' 'Inline'
 _Str :: Prism' Inline String
 _Str = prism' Str f
@@ -205,7 +220,6 @@ _Span = prism' (Span nullAttr) f
     f _          = Nothing
 
 instance Plated Inline
-instance Plated Block
 
 -- | An object that has attributes
 class HasAttr a where
