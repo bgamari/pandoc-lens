@@ -56,7 +56,7 @@ body = lens (\(Pandoc _ b)->b) (\(Pandoc m _) b->Pandoc m b)
 
 -- | A traversal focusing on a particular metadata value of a document
 meta :: String -> Traversal' Pandoc MetaValue
-meta m = metaL . _Wrapped' . ix m
+meta name = metaL . _Wrapped' . ix name
   where
     metaL :: Lens' Pandoc Meta
     metaL = lens (\(Pandoc m _)->m) (\(Pandoc _ a) m->Pandoc m a)
@@ -130,7 +130,7 @@ instance Plated Block where
         DefinitionList blks    -> DefinitionList <$> traverseOf (each . _2 . each . each) f blks
         Table a b c hdrs rows  -> Table a b c <$> traverseOf (each . each) f hdrs
                                               <*> traverseOf (each . each . each) f rows
-        Div attrs blk          -> Div attrs <$> traverseOf each f blk
+        Div attrs blks         -> Div attrs <$> traverseOf each f blks
         _                      -> pure blk
 
 -- | Traverse over the 'Inline' children of a 'Block'
