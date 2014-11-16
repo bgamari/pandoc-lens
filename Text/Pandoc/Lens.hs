@@ -10,7 +10,8 @@
 
 module Text.Pandoc.Lens
     ( -- * Documents
-      body
+      Pandoc
+    , body
     , meta
       -- * Blocks
       -- | Prisms are provided for the constructors of 'Block'
