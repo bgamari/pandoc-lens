@@ -1,5 +1,5 @@
 name:                pandoc-lens
-version:             0.2.1
+version:             0.3
 synopsis:            Lenses for Pandoc documents
 description:         Lenses for Pandoc documents
 homepage:            http://github.com/bgamari/pandoc-lens
@@ -18,7 +18,7 @@ source-repository head
 
 library
   exposed-modules:     Text.Pandoc.Lens
-  ghc-options:         -Werror -Wall -fno-warn-orphans
+  ghc-options:         -Wall -fno-warn-orphans
   build-depends:       base >=4.7 && <4.8,
                        containers >=0.5 && <0.6,
                        pandoc-types >=1.12 && <1.13,
