@@ -223,16 +223,16 @@ instance Plated Inline
 
 -- | An object that has attributes
 class HasAttr a where
-  -- | A traversal over the attributes of an object
-  attributes :: Traversal' a Attr
+    -- | A traversal over the attributes of an object
+    attributes :: Traversal' a Attr
 
 instance HasAttr Block where
-  attributes f (CodeBlock a s) = fmap (\a'->CodeBlock a' s) (f a)
-  attributes f (Header n a s)  = fmap (\a'->Header n a' s) (f a)
-  attributes f (Div a s)       = fmap (\a'->Div a' s) (f a)
-  attributes _ x = pure x
+    attributes f (CodeBlock a s) = fmap (\a'->CodeBlock a' s) (f a)
+    attributes f (Header n a s)  = fmap (\a'->Header n a' s) (f a)
+    attributes f (Div a s)       = fmap (\a'->Div a' s) (f a)
+    attributes _ x = pure x
 
 instance HasAttr Inline where
-  attributes f (Code a s) = fmap (\a'->Code a' s) (f a)
-  attributes f (Span a s) = fmap (\a'->Span a' s) (f a)
-  attributes _ x = pure x
+    attributes f (Code a s) = fmap (\a'->Code a' s) (f a)
+    attributes f (Span a s) = fmap (\a'->Span a' s) (f a)
+    attributes _ x = pure x
