@@ -84,6 +84,15 @@ instance Wrapped Meta where
     type Unwrapped Meta = Map String MetaValue
     _Wrapped' = iso unMeta Meta
 
+type instance Index Meta = String
+type instance IxValue Meta = MetaValue
+
+instance Ixed Meta where
+  ix k = _Wrapped' . ix k
+
+instance At Meta where
+  at k = _Wrapped' . at k
+
 -- | A prism on a 'Plain' 'Block'
 _Plain :: Prism' Block [Inline]
 _Plain = prism' Plain f
