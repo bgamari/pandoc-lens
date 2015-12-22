@@ -48,6 +48,13 @@ module Text.Pandoc.Lens
     -- , _Image
     , _Note
     , _Span
+      -- * Metadata
+    , _MetaMap
+    , _MetaList
+    , _MetaBool
+    , _MetaString
+    , _MetaInlines
+    , _MetaBlocks
       -- * Attributes
     , HasAttr(..)
     ) where
@@ -71,6 +78,48 @@ meta name = metaL . _Wrapped' . ix name
 instance Wrapped Meta where
     type Unwrapped Meta = Map String MetaValue
     _Wrapped' = iso unMeta Meta
+
+-- | A prism on a piece of 'MetaMap' metadata
+_MetaMap :: Prism' MetaValue (Map String MetaValue)
+_MetaMap = prism' MetaMap f
+  where
+    f (MetaMap x) = Just x
+    f _           = Nothing
+
+-- | A prism on a piece of 'MetaList' metadata
+_MetaList :: Prism' MetaValue [MetaValue]
+_MetaList = prism' MetaList f
+  where
+    f (MetaList x) = Just x
+    f _            = Nothing
+
+-- | A prism on a piece of 'MetaBool' metadata
+_MetaBool :: Prism' MetaValue Bool
+_MetaBool = prism' MetaBool f
+  where
+    f (MetaBool x) = Just x
+    f _            = Nothing
+
+-- | A prism on a piece of 'MetaString' metadata
+_MetaString :: Prism' MetaValue String
+_MetaString = prism' MetaString f
+  where
+    f (MetaString x) = Just x
+    f _              = Nothing
+
+-- | A prism on a piece of 'MetaInlines' metadata
+_MetaInlines :: Prism' MetaValue [Inline]
+_MetaInlines = prism' MetaInlines f
+  where
+    f (MetaInlines x) = Just x
+    f _               = Nothing
+
+-- | A prism on a piece of 'MetaBlocks' metadata
+_MetaBlocks :: Prism' MetaValue [Block]
+_MetaBlocks = prism' MetaBlocks f
+  where
+    f (MetaBlocks x) = Just x
+    f _              = Nothing
 
 -- | A prism on a 'Plain' 'Block'
 _Plain :: Prism' Block [Inline]
