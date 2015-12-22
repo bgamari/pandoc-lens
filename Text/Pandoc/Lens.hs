@@ -4,8 +4,8 @@
 -- | This provides a variety of optics for traversing and
 -- destructuring Pandoc documents.
 --
--- Note that both @Inline@ and @Block@ have @Plated@ instances which
--- are useful for traversing the AST.
+-- Note that both 'Inline', 'Block', and 'MetaValue' have 'Plated' instances
+-- which are useful for traversing the AST.
 
 module Text.Pandoc.Lens
     ( -- * Documents
@@ -51,6 +51,9 @@ module Text.Pandoc.Lens
     , _Note
     , _Span
       -- * Metadata
+      -- | Prisms are provided for the constructors of 'MetaValue'
+      -- as well as a 'Plated' instance.
+    , MetaValue
     , _MetaMap
     , _MetaList
     , _MetaBool
@@ -80,48 +83,6 @@ meta name = metaL . _Wrapped' . ix name
 instance Wrapped Meta where
     type Unwrapped Meta = Map String MetaValue
     _Wrapped' = iso unMeta Meta
-
--- | A prism on a piece of 'MetaMap' metadata
-_MetaMap :: Prism' MetaValue (Map String MetaValue)
-_MetaMap = prism' MetaMap f
-  where
-    f (MetaMap x) = Just x
-    f _           = Nothing
-
--- | A prism on a piece of 'MetaList' metadata
-_MetaList :: Prism' MetaValue [MetaValue]
-_MetaList = prism' MetaList f
-  where
-    f (MetaList x) = Just x
-    f _            = Nothing
-
--- | A prism on a piece of 'MetaBool' metadata
-_MetaBool :: Prism' MetaValue Bool
-_MetaBool = prism' MetaBool f
-  where
-    f (MetaBool x) = Just x
-    f _            = Nothing
-
--- | A prism on a piece of 'MetaString' metadata
-_MetaString :: Prism' MetaValue String
-_MetaString = prism' MetaString f
-  where
-    f (MetaString x) = Just x
-    f _              = Nothing
-
--- | A prism on a piece of 'MetaInlines' metadata
-_MetaInlines :: Prism' MetaValue [Inline]
-_MetaInlines = prism' MetaInlines f
-  where
-    f (MetaInlines x) = Just x
-    f _               = Nothing
-
--- | A prism on a piece of 'MetaBlocks' metadata
-_MetaBlocks :: Prism' MetaValue [Block]
-_MetaBlocks = prism' MetaBlocks f
-  where
-    f (MetaBlocks x) = Just x
-    f _              = Nothing
 
 -- | A prism on a 'Plain' 'Block'
 _Plain :: Prism' Block [Inline]
@@ -363,6 +324,55 @@ instance Plated Inline where
         Cite cit cs    -> Cite cit <$> traverseOf each f cs
         Span attrs cs  -> Span attrs <$> traverseOf each f cs
         _              -> pure inl
+
+-- | A prism on a piece of 'MetaMap' metadata
+_MetaMap :: Prism' MetaValue (Map String MetaValue)
+_MetaMap = prism' MetaMap f
+  where
+    f (MetaMap x) = Just x
+    f _           = Nothing
+
+-- | A prism on a piece of 'MetaList' metadata
+_MetaList :: Prism' MetaValue [MetaValue]
+_MetaList = prism' MetaList f
+  where
+    f (MetaList x) = Just x
+    f _            = Nothing
+
+-- | A prism on a piece of 'MetaBool' metadata
+_MetaBool :: Prism' MetaValue Bool
+_MetaBool = prism' MetaBool f
+  where
+    f (MetaBool x) = Just x
+    f _            = Nothing
+
+-- | A prism on a piece of 'MetaString' metadata
+_MetaString :: Prism' MetaValue String
+_MetaString = prism' MetaString f
+  where
+    f (MetaString x) = Just x
+    f _              = Nothing
+
+-- | A prism on a piece of 'MetaInlines' metadata
+_MetaInlines :: Prism' MetaValue [Inline]
+_MetaInlines = prism' MetaInlines f
+  where
+    f (MetaInlines x) = Just x
+    f _               = Nothing
+
+-- | A prism on a piece of 'MetaBlocks' metadata
+_MetaBlocks :: Prism' MetaValue [Block]
+_MetaBlocks = prism' MetaBlocks f
+  where
+    f (MetaBlocks x) = Just x
+    f _              = Nothing
+
+instance Plated MetaValue where
+    plate f inl =
+      case inl of
+        MetaMap cs  -> MetaMap <$> traverseOf each f cs
+        MetaList cs -> MetaList <$> traverseOf each f cs
+        _           -> pure inl
 
 -- | An object that has attributes
 class HasAttr a where
