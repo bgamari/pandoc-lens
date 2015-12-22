@@ -1,6 +1,5 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 -- | This provides a variety of optics for traversing and
 -- destructuring Pandoc documents.
@@ -22,9 +21,12 @@ module Text.Pandoc.Lens
     , _Para
     , _CodeBlock
     , _BlockQuote
+    , _OrderedList
     , _BulletList
     , _DefinitionList
+    , _Header
     , _HorizontalRule
+    , _Div
     , _Null
       -- * Inlines
       -- | Prisms are provided for the constructors of 'Inline'
@@ -37,15 +39,15 @@ module Text.Pandoc.Lens
     , _Superscript
     , _Subscript
     , _SmallCaps
-    -- , _Quoted
-    -- , _Cite
+    , _Quoted
+    , _Cite
     , _Code
     , _Space
     , _LineBreak
-    -- , _Math
-    -- , _RawInline
-    -- , _Link
-    -- , _Image
+    , _Math
+    , _RawInline
+    , _Link
+    , _Image
     , _Note
     , _Span
       -- * Metadata
@@ -150,6 +152,13 @@ _BlockQuote = prism' BlockQuote f
     f _                  = Nothing
 
 -- | A prism on the items of a bullet list 'Block'
+_OrderedList :: Prism' Block (ListAttributes, [[Block]])
+_OrderedList = prism' (uncurry OrderedList) f
+  where
+    f (OrderedList x y)  = Just (x, y)
+    f _                  = Nothing
+
+-- | A prism on the items of a bullet list 'Block'
 _BulletList :: Prism' Block [[Block]]
 _BulletList = prism' BulletList f
   where
@@ -163,12 +172,26 @@ _DefinitionList = prism' DefinitionList f
     f (DefinitionList x) = Just x
     f _                  = Nothing
 
+-- | A prism on a 'Header' 'Block'
+_Header :: Prism' Block (Int, [Inline])
+_Header = prism' (\(a,b) -> Header a nullAttr b) f
+  where
+    f (Header a _ b)   = Just (a, b)
+    f _                = Nothing
+
 -- | A prism on a 'HorizontalRule' 'Block'
 _HorizontalRule :: Prism' Block ()
 _HorizontalRule = prism' (const HorizontalRule) f
   where
     f HorizontalRule     = Just ()
     f _                  = Nothing
+
+-- | A prism on a 'Div' 'Block'
+_Div :: Prism' Block [Block]
+_Div = prism' (Div nullAttr) f
+  where
+    f (Div _ a)    = Just a
+    f _            = Nothing
 
 -- | A prism on a 'Null' 'Block'
 _Null :: Prism' Block ()
@@ -250,6 +273,20 @@ _SmallCaps = prism' SmallCaps f
     f (SmallCaps s) = Just s
     f _             = Nothing
 
+-- | A prism on a 'Quoted' 'Inline'
+_Quoted :: Prism' Inline (QuoteType, [Inline])
+_Quoted = prism' (uncurry Quoted) f
+  where
+    f (Quoted a b)  = Just (a,b)
+    f _             = Nothing
+
+-- | A prism on a 'Cite' 'Inline'
+_Cite :: Prism' Inline ([Citation], [Inline])
+_Cite = prism' (uncurry Cite) f
+  where
+    f (Cite a b)  = Just (a,b)
+    f _           = Nothing
+
 -- | A prism on the body of a 'Code' 'Inline'
 _Code :: Prism' Inline String
 _Code = prism' (Code nullAttr) f
@@ -270,6 +307,34 @@ _LineBreak = prism' (const LineBreak) f
   where
     f LineBreak = Just ()
     f _         = Nothing
+
+-- | A prism on a 'Math' 'Inline'
+_Math :: Prism' Inline (MathType, String)
+_Math = prism' (uncurry Math) f
+  where
+    f (Math a b) = Just (a, b)
+    f _          = Nothing
+
+-- | A prism on a 'RawInline' 'Inline'
+_RawInline :: Prism' Inline (Format, String)
+_RawInline = prism' (uncurry RawInline) f
+  where
+    f (RawInline a b) = Just (a, b)
+    f _               = Nothing
+
+-- | A prism on a 'Link' 'Inline'
+_Link :: Prism' Inline ([Inline], Target)
+_Link = prism' (uncurry Link) f
+  where
+    f (Link a b) = Just (a, b)
+    f _          = Nothing
+
+-- | A prism on a 'Image' 'Inline'
+_Image :: Prism' Inline ([Inline], Target)
+_Image = prism' (uncurry Image) f
+  where
+    f (Image a b) = Just (a, b)
+    f _           = Nothing
 
 -- | A prism on a 'Note' 'Inline'
 _Note :: Prism' Inline [Block]
