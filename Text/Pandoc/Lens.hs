@@ -62,6 +62,9 @@ module Text.Pandoc.Lens
     , _MetaBlocks
       -- * Attributes
     , HasAttr(..)
+    , attrIdentifier
+    , attrClasses
+    , attrs
     ) where
 
 import Control.Applicative
@@ -398,3 +401,15 @@ instance HasAttr Inline where
     attributes f (Code a s) = fmap (\a'->Code a' s) (f a)
     attributes f (Span a s) = fmap (\a'->Span a' s) (f a)
     attributes _ x = pure x
+
+-- | A lens onto identifier of an 'Attr'
+attrIdentifier :: Lens' Attr String
+attrIdentifier = _1
+
+-- | A lens onto classes of an 'Attr'
+attrClasses :: Lens' Attr [String]
+attrClasses = _2
+
+-- | A lens onto the key-value pairs of an 'Attr'
+attrs :: Lens' Attr [(String, String)]
+attrs = _3
