@@ -297,17 +297,17 @@ _RawInline = prism' (uncurry RawInline) f
 
 -- | A prism on a 'Link' 'Inline'
 _Link :: Prism' Inline ([Inline], Target)
-_Link = prism' (uncurry Link) f
+_Link = prism' (uncurry $ Link nullAttr) f
   where
-    f (Link a b) = Just (a, b)
-    f _          = Nothing
+    f (Link _ a b) = Just (a, b)
+    f _            = Nothing
 
 -- | A prism on a 'Image' 'Inline'
 _Image :: Prism' Inline ([Inline], Target)
-_Image = prism' (uncurry Image) f
+_Image = prism' (uncurry $ Image nullAttr) f
   where
-    f (Image a b) = Just (a, b)
-    f _           = Nothing
+    f (Image _ a b) = Just (a, b)
+    f _             = Nothing
 
 -- | A prism on a 'Note' 'Inline'
 _Note :: Prism' Inline [Block]
