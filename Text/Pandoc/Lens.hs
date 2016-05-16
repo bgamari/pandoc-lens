@@ -26,6 +26,7 @@ module Text.Pandoc.Lens
     , _DefinitionList
     , _Header
     , _HorizontalRule
+    , _Table
     , _Div
     , _Null
       -- * Inlines
@@ -158,6 +159,13 @@ _HorizontalRule = prism' (const HorizontalRule) f
   where
     f HorizontalRule     = Just ()
     f _                  = Nothing
+
+-- | A prism on a 'Table' 'Block'
+_Table :: Prism' Block ([Inline], [Alignment], [Double], [TableCell], [[TableCell]])
+_Table = prism' (\(a, b, c, d, e) -> Table a b c d e) f
+  where
+    f (Table a b c d e) = Just (a, b, c, d, e)
+    f _                 = Nothing
 
 -- | A prism on a 'Div' 'Block'
 _Div :: Prism' Block [Block]
