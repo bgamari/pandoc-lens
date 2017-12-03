@@ -51,6 +51,7 @@ module Text.Pandoc.Lens
     , _Image
     , _Note
     , _Span
+    , inlinePrePlate
       -- * Metadata
       -- | Prisms are provided for the constructors of 'MetaValue'
       -- as well as a 'Plated' instance.
@@ -331,19 +332,23 @@ _Span = prism' (Span nullAttr) f
     f (Span _ s) = Just s
     f _          = Nothing
 
+-- | An affine traversal over the '[Inline]' in the last argument of an 'Inline' constructor
+inlinePrePlate :: Traversal' Inline [Inline]
+inlinePrePlate f inl =
+  case inl of
+    Emph cs        -> Emph <$> f cs
+    Strong cs      -> Strong <$> f cs
+    Strikeout cs   -> Strikeout <$> f cs
+    Superscript cs -> Superscript <$> f cs
+    Subscript cs   -> Subscript <$> f cs
+    SmallCaps cs   -> SmallCaps <$> f cs
+    Quoted q cs    -> Quoted q <$> f cs
+    Cite cit cs    -> Cite cit <$> f cs
+    Span attrs cs  -> Span attrs <$> f cs
+    _              -> pure inl
+
 instance Plated Inline where
-    plate f inl =
-      case inl of
-        Emph cs        -> Emph <$> traverseOf each f cs
-        Strong cs      -> Strong <$> traverseOf each f cs
-        Strikeout cs   -> Strikeout <$> traverseOf each f cs
-        Superscript cs -> Superscript <$> traverseOf each f cs
-        Subscript cs   -> Subscript <$> traverseOf each f cs
-        SmallCaps cs   -> SmallCaps <$> traverseOf each f cs
-        Quoted q cs    -> Quoted q <$> traverseOf each f cs
-        Cite cit cs    -> Cite cit <$> traverseOf each f cs
-        Span attrs cs  -> Span attrs <$> traverseOf each f cs
-        _              -> pure inl
+    plate = inlinePrePlate . each
 
 -- | A prism on a piece of 'MetaMap' metadata
 _MetaMap :: Prism' MetaValue (Map String MetaValue)
