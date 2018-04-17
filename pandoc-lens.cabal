@@ -1,12 +1,12 @@
 name:                pandoc-lens
 version:             0.6.3
 synopsis:            Lenses for Pandoc documents
-description:         Lenses for Pandoc documents
+description:         Lenses for Pandoc documents.
 homepage:            http://github.com/bgamari/pandoc-lens
 license:             BSD3
 license-file:        LICENSE
 author:              Ben Gamari
-maintainer:          bgamari.foss@gmail.com
+maintainer:          ben@smart-cactus.org
 copyright:           (c) 2014 Ben Gamari
 category:            Text
 build-type:          Simple
