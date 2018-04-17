@@ -1,6 +1,5 @@
 name:                pandoc-lens
-version:             0.6.2
-x-revision:          2
+version:             0.6.3
 synopsis:            Lenses for Pandoc documents
 description:         Lenses for Pandoc documents
 homepage:            http://github.com/bgamari/pandoc-lens
