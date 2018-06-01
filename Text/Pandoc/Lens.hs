@@ -29,6 +29,7 @@ module Text.Pandoc.Lens
     , _Table
     , _Div
     , _Null
+    , blockPrePlate
       -- * Inlines
       -- | Prisms are provided for the constructors of 'Inline'
       -- as well as a 'Plated' instance.
@@ -182,17 +183,21 @@ _Null = prism' (const Null) f
     f Null = Just ()
     f _    = Nothing
 
+-- | An affine traversal over the '[Block]' in the last argument of an 'Block' constructor
+blockPrePlate :: Traversal' Block [Block]
+blockPrePlate f blk =
+    case blk of
+      BlockQuote blks         -> BlockQuote <$> f blks
+      OrderedList attrs' blks -> OrderedList attrs' <$> traverseOf each f blks
+      BulletList blks         -> BulletList <$> traverseOf each f blks
+      DefinitionList blks     -> DefinitionList <$> traverseOf (each . _2 . each) f blks
+      Table a b c hdrs rows   -> Table a b c <$> traverseOf each f hdrs
+                                            <*> traverseOf (each . each) f rows
+      Div attrs' blks         -> Div attrs' <$> f blks
+      _                       -> pure blk
+
 instance Plated Block where
-    plate f blk =
-      case blk of
-        BlockQuote blks         -> BlockQuote <$> traverse f blks
-        OrderedList attrs' blks -> OrderedList attrs' <$> traverseOf (each . each) f blks
-        BulletList blks         -> BulletList <$> traverseOf (each . each) f blks
-        DefinitionList blks     -> DefinitionList <$> traverseOf (each . _2 . each . each) f blks
-        Table a b c hdrs rows   -> Table a b c <$> traverseOf (each . each) f hdrs
-                                              <*> traverseOf (each . each . each) f rows
-        Div attrs' blks         -> Div attrs' <$> traverseOf each f blks
-        _                       -> pure blk
+  plate = blockPrePlate . each
 
 -- | Traverse over the 'Inline' children of a 'Block'
 blockInlines :: Traversal' Block Inline
