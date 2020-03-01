@@ -69,27 +69,27 @@ module Text.Pandoc.Lens
     , attrs
     ) where
 
-import Control.Applicative
 import Control.Lens
 import Text.Pandoc.Definition
 import Data.Map (Map)
+import Data.Text (Text)
 
 -- | The body of a pandoc document
 body :: Lens' Pandoc [Block]
 body = lens (\(Pandoc _ b)->b) (\(Pandoc m _) b->Pandoc m b)
 
 -- | A traversal focusing on a particular metadata value of a document
-meta :: String -> Traversal' Pandoc MetaValue
+meta :: Text -> Traversal' Pandoc MetaValue
 meta name = metaL . _Wrapped' . ix name
   where
     metaL :: Lens' Pandoc Meta
     metaL = lens (\(Pandoc m _)->m) (\(Pandoc _ a) m->Pandoc m a)
 
 instance Wrapped Meta where
-    type Unwrapped Meta = Map String MetaValue
+    type Unwrapped Meta = Map Text MetaValue
     _Wrapped' = iso unMeta Meta
 
-type instance Index Meta = String
+type instance Index Meta = Text
 type instance IxValue Meta = MetaValue
 
 instance Ixed Meta where
@@ -113,7 +113,7 @@ _Para = prism' Para f
     f _         = Nothing
 
 -- | A prism on the text of a 'CodeBlock'
-_CodeBlock :: Prism' Block String
+_CodeBlock :: Prism' Block Text
 _CodeBlock = prism' (CodeBlock nullAttr) f
   where
     f (CodeBlock _ x)    = Just x
@@ -185,14 +185,14 @@ _Null = prism' (const Null) f
 instance Plated Block where
     plate f blk =
       case blk of
-        BlockQuote blks        -> BlockQuote <$> traverse f blks
-        OrderedList attrs blks -> OrderedList attrs <$> traverseOf (each . each) f blks
-        BulletList blks        -> BulletList <$> traverseOf (each . each) f blks
-        DefinitionList blks    -> DefinitionList <$> traverseOf (each . _2 . each . each) f blks
-        Table a b c hdrs rows  -> Table a b c <$> traverseOf (each . each) f hdrs
+        BlockQuote blks         -> BlockQuote <$> traverse f blks
+        OrderedList attrs' blks -> OrderedList attrs' <$> traverseOf (each . each) f blks
+        BulletList blks         -> BulletList <$> traverseOf (each . each) f blks
+        DefinitionList blks     -> DefinitionList <$> traverseOf (each . _2 . each . each) f blks
+        Table a b c hdrs rows   -> Table a b c <$> traverseOf (each . each) f hdrs
                                               <*> traverseOf (each . each . each) f rows
-        Div attrs blks         -> Div attrs <$> traverseOf each f blks
-        _                      -> pure blk
+        Div attrs' blks         -> Div attrs' <$> traverseOf each f blks
+        _                       -> pure blk
 
 -- | Traverse over the 'Inline' children of a 'Block'
 blockInlines :: Traversal' Block Inline
@@ -207,7 +207,7 @@ blockInlines f blk =
       _                  -> pure blk
 
 -- | A prism on a 'Str' 'Inline'
-_Str :: Prism' Inline String
+_Str :: Prism' Inline Text
 _Str = prism' Str f
   where
     f (Str s) = Just s
@@ -270,7 +270,7 @@ _Cite = prism' (uncurry Cite) f
     f _           = Nothing
 
 -- | A prism on the body of a 'Code' 'Inline'
-_Code :: Prism' Inline String
+_Code :: Prism' Inline Text
 _Code = prism' (Code nullAttr) f
   where
     f (Code _ s) = Just s
@@ -291,14 +291,14 @@ _LineBreak = prism' (const LineBreak) f
     f _         = Nothing
 
 -- | A prism on a 'Math' 'Inline'
-_Math :: Prism' Inline (MathType, String)
+_Math :: Prism' Inline (MathType, Text)
 _Math = prism' (uncurry Math) f
   where
     f (Math a b) = Just (a, b)
     f _          = Nothing
 
 -- | A prism on a 'RawInline' 'Inline'
-_RawInline :: Prism' Inline (Format, String)
+_RawInline :: Prism' Inline (Format, Text)
 _RawInline = prism' (uncurry RawInline) f
   where
     f (RawInline a b) = Just (a, b)
@@ -344,14 +344,14 @@ inlinePrePlate f inl =
     SmallCaps cs   -> SmallCaps <$> f cs
     Quoted q cs    -> Quoted q <$> f cs
     Cite cit cs    -> Cite cit <$> f cs
-    Span attrs cs  -> Span attrs <$> f cs
+    Span attrs' cs -> Span attrs' <$> f cs
     _              -> pure inl
 
 instance Plated Inline where
     plate = inlinePrePlate . each
 
 -- | A prism on a piece of 'MetaMap' metadata
-_MetaMap :: Prism' MetaValue (Map String MetaValue)
+_MetaMap :: Prism' MetaValue (Map Text MetaValue)
 _MetaMap = prism' MetaMap f
   where
     f (MetaMap x) = Just x
@@ -372,7 +372,7 @@ _MetaBool = prism' MetaBool f
     f _            = Nothing
 
 -- | A prism on a piece of 'MetaString' metadata
-_MetaString :: Prism' MetaValue String
+_MetaString :: Prism' MetaValue Text
 _MetaString = prism' MetaString f
   where
     f (MetaString x) = Just x
@@ -416,13 +416,13 @@ instance HasAttr Inline where
     attributes _ x = pure x
 
 -- | A lens onto identifier of an 'Attr'
-attrIdentifier :: Lens' Attr String
+attrIdentifier :: Lens' Attr Text
 attrIdentifier = _1
 
 -- | A lens onto classes of an 'Attr'
-attrClasses :: Lens' Attr [String]
+attrClasses :: Lens' Attr [Text]
 attrClasses = _2
 
 -- | A lens onto the key-value pairs of an 'Attr'
-attrs :: Lens' Attr [(String, String)]
+attrs :: Lens' Attr [(Text, Text)]
 attrs = _3
