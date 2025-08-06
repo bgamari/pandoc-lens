@@ -28,7 +28,6 @@ module Text.Pandoc.Lens
     , _HorizontalRule
     , _Table
     , _Div
-    , _Null
     , blockPrePlate
       -- * Inlines
       -- | Prisms are provided for the constructors of 'Inline'
@@ -163,10 +162,12 @@ _HorizontalRule = prism' (const HorizontalRule) f
     f _                  = Nothing
 
 -- | A prism on a 'Table' 'Block'
-_Table :: Prism' Block ([Inline], [Alignment], [Double], [TableCell], [[TableCell]])
-_Table = prism' (\(a, b, c, d, e) -> Table a b c d e) f
+_Table :: Prism' Block (Attr, Caption,[ColSpec],TableHead,[TableBody],TableFoot)
+_Table = prism' (\(attr, caption, colSpecs, tableHead, tableBodies, tableFoot)
+                 -> Table attr caption colSpecs tableHead tableBodies tableFoot) f
   where
-    f (Table a b c d e) = Just (a, b, c, d, e)
+    f (Table attr caption colSpecs tableHead tableBodies tableFoot)
+                        = Just (attr, caption, colSpecs, tableHead, tableBodies, tableFoot)
     f _                 = Nothing
 
 -- | A prism on a 'Div' 'Block'
@@ -176,13 +177,6 @@ _Div = prism' (Div nullAttr) f
     f (Div _ a)    = Just a
     f _            = Nothing
 
--- | A prism on a 'Null' 'Block'
-_Null :: Prism' Block ()
-_Null = prism' (const Null) f
-  where
-    f Null = Just ()
-    f _    = Nothing
-
 -- | An affine traversal over the '[Block]' in the last argument of an 'Block' constructor
 blockPrePlate :: Traversal' Block [Block]
 blockPrePlate f blk =
@@ -191,8 +185,7 @@ blockPrePlate f blk =
       OrderedList attrs' blks -> OrderedList attrs' <$> traverseOf each f blks
       BulletList blks         -> BulletList <$> traverseOf each f blks
       DefinitionList blks     -> DefinitionList <$> traverseOf (each . _2 . each) f blks
-      Table a b c hdrs rows   -> Table a b c <$> traverseOf each f hdrs
-                                            <*> traverseOf (each . each) f rows
+      Figure a b blks         -> Figure a b <$> f blks
       Div attrs' blks         -> Div attrs' <$> f blks
       _                       -> pure blk
 
@@ -205,10 +198,9 @@ blockInlines f blk =
     case blk of
       Plain inls         -> Plain <$> traverse f inls
       Para inls          -> Para <$> traverse f inls
+      LineBlock inlss    -> LineBlock <$> traverseOf (each . each) f inlss
       DefinitionList xs  -> DefinitionList <$> traverseOf (each . _1 . each) f xs
       Header n attr inls -> Header n attr <$> traverse f inls
-      Table capt a b c d -> Table <$> traverse f capt
-                                  <*> pure a <*> pure b <*> pure c <*> pure d
       _                  -> pure blk
 
 -- | A prism on a 'Str' 'Inline'
