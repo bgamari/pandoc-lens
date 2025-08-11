@@ -1,0 +1,13 @@
+# `pandoc-lens` changelog
+
+## 0.8
+
+* Update for `pandoc-types-0.23`
+
+## 0.7
+
+* Update for `pandoc-types-0.21`
+
+## 0.6 and earlier
+
+Pre-history.
